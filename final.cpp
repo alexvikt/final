@@ -47,6 +47,14 @@ system("echo Connect... >>  debug.log");
 #ifdef DEBUG
 sprintf(&logbuf[5]," %d bytes received. >> debug.log", n);
 system(logbuf);
+{
+int logfd;
+logfd = open("log.txt", O_RDWR | O_APPEND);
+if (logfd != -1) {
+  write(logfd,buf,n);
+  close(logfd);
+}
+}
 #endif
     if (n > 0) {
       sscanf(buf,"%s %s %*s",method,uri);
@@ -83,7 +91,7 @@ system(logbuf);
 sprintf(&logbuf[5],"FD %d . Read %d byte.  >> debug.log", fd, nb);
 system(logbuf);
 int logfd;
-logfd = open("log.txt", O_WRONLY);
+logfd = open("log.txt", O_RDWR | O_APPEND);
 if (logfd != -1) {
   write(logfd,buffer,lh+nb);
   close(logfd);
