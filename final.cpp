@@ -70,13 +70,25 @@ sprintf(&logbuf[5],"File %s exist. %lu byte.  >> debug.log", uri, file_stat.st_s
 system(logbuf);
 #endif
       int fd;
+      int nb, lh;
       fd = open(uri, O_RDONLY);
       if (fd != -1) {
         notfound = false;
         char *buffer = (char *) malloc(file_stat.st_size + 100); 
         memset(buffer,0, sizeof(char) * (file_stat.st_size + 100));
         sprintf(buffer,"HTTP/1.0 200 OK\r\nContent-length: %lu\r\nConnection: close\r\nContent-Type: text/html\r\n\r\n", file_stat.st_size);
-        read (fd,&buffer[strlen(buffer)],file_stat.st_size);
+        lh = strlen(buffer);
+        nb = read (fd,&buffer[lh],file_stat.st_size);
+#ifdef DEBUG
+sprintf(&logbuf[5],"FD %d . Read %d byte.  >> debug.log", fd, nb);
+system(logbuf);
+int logfd;
+logfd = open("log.txt", O_WRONLY);
+if (logfd != -1) {
+  write(logfd,buffer,lh+nb);
+  close(logfd);
+}
+#endif
         close (fd);
         sendto(sock.s, buffer, strlen(buffer), 0, (struct sockaddr *)& sock.a, sizeof(sock.a));
         free(buffer);
